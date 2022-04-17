@@ -11,55 +11,72 @@ public class EnemyAI : MonoBehaviour
     public NavMeshAgent nav;
     public int healthBar = 3;
     public Object self;
+    private AudioSource enemyDeath;
 
     void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         nav = GetComponent<NavMeshAgent>();
+        enemyDeath = GetComponent<AudioSource>();
+
+        setRigidbodyState(true);
+        setColliderState(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        nav.SetDestination(player.position);
+        if (GetComponent<Animator>().enabled)
+        {
+            nav.SetDestination(player.position);
+        }
 
         if (healthBar <= 0)
         {
-            Destroy(self);
+            healthBar = 99;
+            enemyDeath.pitch = Random.Range(0.8f, 1f);
+            enemyDeath.Play();
+            Death();
         }
+
     }
-
-/*    void OnTriggerEnter(Collider other)
-    {
-        //Note: we use colliders here, not collisions
-
-    }*/
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "HandHitbox")
         {
-            Debug.Log("Got slapped lmao");
             healthBar -= 1;
         }
     }
+    private void Death()
+    {
+        Destroy(gameObject, 15f);
+        GetComponent<Animator>().enabled = false;
+        GetComponent<NavMeshAgent>().enabled = false;
+        setRigidbodyState(false);
+        setColliderState(true);
+    }
 
-    /*    void OnCollisionEnter(Collision collision)
+    void setRigidbodyState(bool state)
+    {
+        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
+
+        foreach(Rigidbody rigidbody in rigidbodies)
         {
-            Debug.Log("IM COLLIDING");
-            Debug.Log(collision.gameObject.name);
-            //Check for a match with the specified name on any GameObject that collides with your GameObject
-            if (collision.gameObject.name == "HandHitbox")
-            {
-                //If the GameObject's name matches the one you suggest, output this message in the console
-                Debug.Log("Do something here");
-            }
+            rigidbody.isKinematic = state;
+        }
 
-            //Check for a match with the specific tag on any GameObject that collides with your GameObject
-            if (collision.gameObject.tag == "HandHitbox")
-            {
-                //If the GameObject has the same tag as specified, output this message in the console
-                Debug.Log("Do something else here");
-            }
-        }*/
+    }
+
+    void setColliderState(bool state)
+    {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (Collider collider in colliders)
+        {
+            collider.enabled = state;
+        }
+
+        GetComponent<Collider>().enabled = !state;
+    }
 }

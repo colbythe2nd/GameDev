@@ -9,11 +9,13 @@ public class NewBehaviourScript : MonoBehaviour
     public TextMeshProUGUI textComponent;
     public string[] lines;
     public float textSpeed;
+    private AudioSource dialogueClick;
 
     private int index;
     // Start is called before the first frame update
     void Start()
     {
+        dialogueClick = GetComponent<AudioSource>();
         textComponent.text = string.Empty;
         StartDialogue();
     }
@@ -46,6 +48,7 @@ public class NewBehaviourScript : MonoBehaviour
         foreach (char c in lines[index].ToCharArray())
         {
             textComponent.text += c;
+            dialogueClick.Play();
             yield return new WaitForSeconds(textSpeed);
         }
     }
